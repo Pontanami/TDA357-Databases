@@ -1,0 +1,86 @@
+﻿D(studentIdnr, studentName, login, branchName, programName, courseCode, courseName, credits, departmentName, capacity, classification, grade, position)
+
+
+
+
+2. FD:s
+
+
+studentIdnr -> studentName
+studentIdnr -> login
+studentIdnr -> programName
+studentIdnr -> branchName
+
+
+login -> studentIdnr
+login -> studentName
+login -> programName
+login -> branchName
+
+
+courseCode -> courseName
+courseCode -> capacity
+courseCode -> departmentName
+courseCode -> credits
+courseCode -> classification
+
+
+[studentIdnr, courseCode} -> position
+
+
+{studentIdnr, courseCode} -> grade
+
+
+3. Decompose with BCNF
+
+
+We got these 4 tables using the BCNR normalisation tool at http://www.grammaticalframework.org/qconv/ 
+
+
+1. Attributes:
+courseCode courseName credits departmentName capacity classification
+Keys:
+courseCode
+
+
+
+
+2. Attributes:
+login studentIdnr studentName branchName programName
+Keys:
+studentIdnr
+login
+
+
+
+
+3. Attributes:
+login courseCode grade position
+Keys:
+login courseCode
+
+
+
+
+4. Attributes:
+login courseCode classification
+Keys:
+login courseCode classification
+
+
+R1(courseCode courseName credits capacity departmentName, classification)
+R2(login studentIdnr studentName branchName programName)
+R3(login courseCode grade position)
+R4(login courseCode classification)
+
+
+4. MVD
+courseCode ->-> classification is a multivalued dependency
+
+
+So the relation R1 should be decomposed into two different relations
+
+
+Ra(courseCode courseName credits, capacity, departmentName)
+and
+Rb(courseCode classification)
