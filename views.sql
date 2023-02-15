@@ -72,7 +72,6 @@ CREATE VIEW PathToGraduation AS(
     LEFT OUTER JOIN RecommendedCredits ON BasicInformation.idnr = RecommendedCredits.student);
 
 -- 7 --
---View CourseQueuePositions(course,student,place): for all students who are in the queue for a course, the course code, the student's identification number, and the student's current place in the queue (the student who is first in a queue will have place "1" in that queue, etc.). This view is trivial if you store the positions directly in the database, but not if you store e.g. registration timestamps.
 CREATE VIEW CourseQueuePositions AS
     SELECT course, student, position AS place
     FROM WaitingList;

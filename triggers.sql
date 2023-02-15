@@ -75,8 +75,22 @@ CREATE FUNCTION unregister RETURNS trigger AS $$
             THEN RAISE EXCEPTION '% is on waitinglist for course %', OLD.student, OLD.course;
         END IF;
 
-        --Delete student fromm Registrations
+        --Delete student from Registrations
+        DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
 
         -- Check if this opened up a spot on the course. if so, add first in WaitingList to Registrations
+        IF (SELECT COUNT(*) FROM Registrations WHERE course = OLD.code AND status = 'registered') <
+        (SELECT capacity FROM LimitedCourses WHERE code = OLD.code)
+        THEN
+            -- course is not full, add first in waitinglist to registrations
+            INSERT INTO Registered(student, course) VALUES 
+            (
+            (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1), OLD.course
+            );
     END;
+
+CREATE TRIGGER unregister
+INSTEAD OF DELETE ON Registrations
+FOR EACH ROW EXECUTE FUNCTION unregister() ;
+
 $$ LANGUAGE plpgsql;
