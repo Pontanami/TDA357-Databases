@@ -44,6 +44,7 @@ CREATE OR REPLACE FUNCTION register() RETURNS trigger AS $$
 				NEW.course,
 				((SELECT Count(student) FROM WaitingList WHERE course = NEW.course) + 1)
 			);
+             RETURN NEW;
         ELSE
             -- course is not full Insert into registered (Limited course)
 		    INSERT INTO Registered(student, course) VALUES (NEW.student, NEW.course);	
@@ -58,28 +59,29 @@ FOR EACH ROW EXECUTE PROCEDURE register();
 
 CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
     BEGIN
+        --Check if student is not registered or not on waitinglist for this course (no work)
+        IF(
+        NOT EXISTS(SELECT student FROM Registrations WHERE student = OLD.student AND course = OLD.course))
+            THEN RAISE EXCEPTION '% is not registered for course %', OLD.student, OLD.course;
+        END IF;
+
         --Check if its a limitedcourse or not, if not then unregister for course.
 		IF(NOT EXISTS (SELECT code FROM LimitedCourses WHERE code = OLD.course))
 			THEN 
 			DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
-			RETURN NEW;
+			RETURN OLD;
 		END IF;
-
-        --Check if student is not registered or on waitinglist for this course
-        IF(NOT EXISTS(SELECT student FROM Registered WHERE student = OLD.student AND course = OLD.course) AND
-        NOT EXISTS(SELECT student FROM WaitingList WHERE student = OLD.student AND course = OLD.course))
-            THEN RAISE EXCEPTION '% is not registered for course %', OLD.student, OLD.course;
-        END IF;
 
         --Check if student is on waitinglist for this course and then remove from waitinglist
         IF(EXISTS(SELECT student FROM WaitingList WHERE student = OLD.student AND course = OLD.course))
             THEN 
             DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
-            RETURN NEW;
+            RETURN OLD;
         END IF;
 
         --Delete student from Registrations
         DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
+        RETURN OLD;
 
         -- Check if this opened up a spot on the course. if so, add first in WaitingList to Registrations
         IF (SELECT COUNT(*) FROM Registrations WHERE course = OLD.course AND status = 'registered') <
@@ -90,6 +92,7 @@ CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
             (
             (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1), OLD.course
             );
+            RETURN NEW;
         END IF;
     END
 $$ LANGUAGE plpgsql;
