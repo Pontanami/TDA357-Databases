@@ -65,8 +65,9 @@ CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
 			RETURN NEW;
 		END IF;
 
-        --Check if student is not registered for this course
-        IF(NOT EXISTS(SELECT student FROM Registered WHERE student = OLD.student AND course = OLD.course))
+        --Check if student is not registered or on waitinglist for this course
+        IF(NOT EXISTS(SELECT student FROM Registered WHERE student = OLD.student AND course = OLD.course) AND
+        NOT EXISTS(SELECT student FROM WaitingList WHERE student = OLD.student AND course = OLD.course))
             THEN RAISE EXCEPTION '% is not registered for course %', OLD.student, OLD.course;
         END IF;
 
