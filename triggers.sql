@@ -2,13 +2,13 @@
 -- < function code here >
 -- $$ LANGUAGE language;
 
-CREATE OR REPLACE FUNCTION register RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION register() RETURNS trigger AS $$
     BEGIN
         --Check prerequisites for the course
         IF(( SELECT COUNT(prerequisite)
             FROM Prerequisites
             WHERE course = NEW.course AND (prerequisite NOT IN(SELECT course FROM PassedCourses WHERE student = NEW.student))) > 0)
-            THEN RAISE EXCEPTION '% has not met the prerequisites for this course', NEW.student
+            THEN RAISE EXCEPTION '% has not met the prerequisites for this course', NEW.student;
         END IF;
 
         --Check if student has passed this course already
@@ -22,7 +22,7 @@ CREATE OR REPLACE FUNCTION register RETURNS trigger AS $$
         END IF;
 
         --Check if course is limited, if not then register for course.
-		IF(NOT EXISTS (SELECT code FROM LimitedCourse WHERE code = NEW.course))
+		IF(NOT EXISTS (SELECT code FROM LimitedCourses WHERE code = NEW.course))
 			THEN 
 			--Insert into registered
 			INSERT INTO Registered(student, course) VALUES (NEW.student, NEW.course);	
@@ -49,17 +49,17 @@ CREATE OR REPLACE FUNCTION register RETURNS trigger AS $$
 		    INSERT INTO Registered(student, course) VALUES (NEW.student, NEW.course);	
 		    RETURN NEW;
         END IF;
-    END;
+    END
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER register
 INSTEAD OF INSERT ON Registrations
-FOR EACH ROW EXECUTE FUNCTION register() ;
+FOR EACH ROW EXECUTE FUNCTION register();
 
-CREATE FUNCTION unregister RETURNS trigger AS $$
+CREATE FUNCTION unregister() RETURNS trigger AS $$
     BEGIN
         --Check if its a limitedcourse or not, if not then unregister for course.
-		IF(NOT EXISTS (SELECT code FROM LimitedCourse WHERE code = OLD.course))
+		IF(NOT EXISTS (SELECT code FROM LimitedCourses WHERE code = OLD.course))
 			THEN 
 			DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
 			RETURN NEW;
@@ -87,10 +87,10 @@ CREATE FUNCTION unregister RETURNS trigger AS $$
             (
             (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1), OLD.course
             );
-    END;
+        END IF;
+    END
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER unregister
 INSTEAD OF DELETE ON Registrations
-FOR EACH ROW EXECUTE FUNCTION unregister() ;
-
-$$ LANGUAGE plpgsql;
+FOR EACH ROW EXECUTE FUNCTION unregister();
