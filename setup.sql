@@ -12,7 +12,7 @@ SET client_min_messages TO NOTICE; -- More talk
 \set QUIET false
 
 \ir tables.sql
-\ir inserts.sql
 \ir views.sql
 \ir triggers.sql
+\ir inserts.sql
 \ir tests.sql
