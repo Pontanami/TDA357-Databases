@@ -1,8 +1,8 @@
 INSERT INTO Departments VALUES ('Dept. of Computing Science', 'CS');--
 INSERT INTO Departments VALUES ('Computer Science and Engineering program', 'CSEP');--
 
-INSERT INTO Programs VALUES ('Prog1');--
-INSERT INTO Programs VALUES ('Prog2');--
+INSERT INTO Programs VALUES ('Prog1', 'P1');--
+INSERT INTO Programs VALUES ('Prog2', 'P2');--
 
 INSERT INTO Branches VALUES ('B2','Prog2');
 INSERT INTO Branches VALUES ('B1','Prog1');
@@ -19,9 +19,13 @@ INSERT INTO Courses VALUES ('CCC222','C2',20,'Computer Science and Engineering p
 INSERT INTO Courses VALUES ('CCC333','C3',30,'Dept. of Computing Science');--
 INSERT INTO Courses VALUES ('CCC444','C4',60,'Dept. of Computing Science');--
 INSERT INTO Courses VALUES ('CCC555','C5',50,'Computer Science and Engineering program');--
+INSERT INTO Courses VALUES ('CCC666', 'C6', 20, 'Computer Science and Engineering program');--
 
 INSERT INTO LimitedCourses VALUES ('CCC222',1);
-INSERT INTO LimitedCourses VALUES ('CCC333',2);
+INSERT INTO LimitedCourses VALUES ('CCC333',3);
+INSERT INTO LimitedCourses VALUES ('CCC444',3);
+
+INSERT INTO Prerequisites VALUES('CCC666', 'CCC111');
 
 INSERT INTO Classifications VALUES ('math');
 INSERT INTO Classifications VALUES ('research');
@@ -48,7 +52,9 @@ INSERT INTO RecommendedBranch VALUES ('CCC333', 'B2', 'Prog2');
 INSERT INTO Registered VALUES ('1111111111','CCC111');
 INSERT INTO Registered VALUES ('1111111111','CCC222');
 INSERT INTO Registered VALUES ('1111111111','CCC333');
+INSERT INTO Registered VALUES ('3333333333','CCC111');
 INSERT INTO Registered VALUES ('2222222222','CCC222');
+INSERT INTO Registered VALUES ('2222222222','CCC333');
 INSERT INTO Registered VALUES ('5555555555','CCC222');
 INSERT INTO Registered VALUES ('5555555555','CCC333');
 
