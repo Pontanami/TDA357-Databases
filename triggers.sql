@@ -90,9 +90,11 @@ CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
             -- course is not full, add first in waitinglist to registrations
             INSERT INTO Registered(student, course) VALUES 
             (
-            (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1), OLD.course
+            (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1), OLD.course  
             );
+            DELETE FROM WaitingList WHERE student = OLD.stuident AND course = OLD.course AND pos = 1;
             RETURN NEW;
+
         END IF;
     END
 $$ LANGUAGE plpgsql;

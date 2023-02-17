@@ -1,7 +1,7 @@
 --------------            Register tests     -------------------------------
 -- TEST #1: Register for an unlimited course.
 -- EXPECTED OUTCOME: Pass
-INSERT INTO Registrations VALUES ('1111111111', 'CCC555'); 
+INSERT INTO Registrations VALUES ('7777777777', 'CCC111'); 
 
 ---------------------------------------------
 -- TEST #2: Register for a limited course
@@ -72,4 +72,9 @@ DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC555';
 -- TEST #14 Unregster student that is not registered or on waitinglist
 -- EXPECTED OUTCOME DELETE 0
 DELETE FROM Registrations WHERE student = '6666666666' AND course = 'CCC333';
+
+---------------------------------------------
+-- TEST #15 Unregister from a limited course with a waiting list, when the student is at the start of the waiting list.
+-- EXPECTED OUTCOME: Pass
+DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC222';
 

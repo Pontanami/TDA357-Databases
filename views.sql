@@ -26,7 +26,6 @@ CREATE VIEW UnreadMandatory AS
     WHERE ((BasicInformation.branch, BasicInformation.program) = (MandatoryBranch.branch, MandatoryBranch.program))) AS Mandatory 
     WHERE (student, course) NOT IN (SELECT student, course FROM PassedCourses);
 -- 6 --
-
 CREATE VIEW PathToGraduation AS( 
     WITH
     ------- Helper queries -------
@@ -73,6 +72,7 @@ CREATE VIEW PathToGraduation AS(
 
 -- 7 --
 CREATE VIEW CourseQueuePositions AS
-    SELECT course, student, position AS place
+    SELECT course, student, ROW_NUMBER() OVER (PARTITION BY course ORDER BY position) AS place
     FROM WaitingList;
+
     
