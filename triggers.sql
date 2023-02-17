@@ -1,8 +1,8 @@
--- CREATE FUNCTION name (parameters) RETURNS type AS $$
--- < function code here >
--- $$ LANGUAGE language;
+CREATE VIEW CourseQueuePositions AS
+    SELECT course, student, ROW_NUMBER() OVER (PARTITION BY course ORDER BY position) AS place
+    FROM WaitingList;
 
-CREATE OR REPLACE FUNCTION register() RETURNS trigger AS $$
+CREATE FUNCTION register() RETURNS trigger AS $$
     BEGIN
         --Check prerequisites for the course
         IF(( SELECT COUNT(prerequisite)
@@ -40,9 +40,8 @@ CREATE OR REPLACE FUNCTION register() RETURNS trigger AS $$
         THEN
             -- course is full insert into waitinglist
             INSERT INTO WaitingList(student, course, position) VALUES (
-				NEW.student,
-				NEW.course,
-				((SELECT Count(student) FROM WaitingList WHERE course = NEW.course) + 1)
+				NEW.student, NEW.course,
+				DEFAULT
 			);
              RETURN NEW;
         ELSE
@@ -53,11 +52,11 @@ CREATE OR REPLACE FUNCTION register() RETURNS trigger AS $$
     END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER register
+CREATE TRIGGER register_trigger
 INSTEAD OF INSERT ON Registrations
 FOR EACH ROW EXECUTE PROCEDURE register();
 
-CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
+CREATE FUNCTION unregister() RETURNS trigger AS $$
     BEGIN
         --Check if student is not registered or not on waitinglist for this course (Cannot check this with this trigger)
         --IF(
@@ -99,6 +98,6 @@ CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
     END
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER unregister
+CREATE TRIGGER unregister_trigger
 INSTEAD OF DELETE ON Registrations
 FOR EACH ROW EXECUTE FUNCTION unregister();
