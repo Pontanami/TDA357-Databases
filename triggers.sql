@@ -59,11 +59,11 @@ FOR EACH ROW EXECUTE PROCEDURE register();
 
 CREATE OR REPLACE FUNCTION unregister() RETURNS trigger AS $$
     BEGIN
-        --Check if student is not registered or not on waitinglist for this course (no work)
-        IF(
-        NOT EXISTS(SELECT student FROM Registrations WHERE student = OLD.student AND course = OLD.course))
-            THEN RAISE EXCEPTION '% is not registered for course %', OLD.student, OLD.course;
-        END IF;
+        --Check if student is not registered or not on waitinglist for this course (Cannot check this with this trigger)
+        --IF(
+        --NOT EXISTS(SELECT student FROM Registrations WHERE student = OLD.student AND course = OLD.course))
+        --    THEN RAISE EXCEPTION '% is not registered for course %', OLD.student, OLD.course;
+        --END IF;
 
         --Check if its a limitedcourse or not, if not then unregister for course.
 		IF(NOT EXISTS (SELECT code FROM LimitedCourses WHERE code = OLD.course))

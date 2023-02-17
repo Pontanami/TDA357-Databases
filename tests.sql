@@ -64,11 +64,12 @@ DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC333';
 DELETE FROM Registrations WHERE student = '2222222222' AND course ='CCC333';
 
 ---------------------------------------------
--- TEST #12 Unregister from an overfull course with a waiting list.?
+-- TEST #13 Unregister from an overfull course with a waiting list.
 -- EXPECTED OUTCOME: Pass
+DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC555';
 
 ---------------------------------------------
--- TEST #13 Unregster student that is not registered or on waitinglist
--- EXPECTED OUTCOME Fail
+-- TEST #14 Unregster student that is not registered or on waitinglist
+-- EXPECTED OUTCOME DELETE 0
 DELETE FROM Registrations WHERE student = '6666666666' AND course = 'CCC333';
 
