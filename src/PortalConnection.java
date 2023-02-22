@@ -1,6 +1,7 @@
 
 import java.sql.*; // JDBC stuff.
 import java.util.Properties;
+import org.json.*; // JSON
 
 public class PortalConnection {
 
@@ -38,18 +39,24 @@ public class PortalConnection {
     // Register a student on a course, returns a tiny JSON document (as a String)
     public String register(String student, String courseCode){
       
-      // placeholder, remove along with this comment. 
-      return "{\"success\":false, \"error\":\"Registration is not implemented yet :(\"}";
-      
-      // Here's a bit of useful code, use it or delete it 
-      // } catch (SQLException e) {
-      //    return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
-      // }     
+      try (PreparedStatement ps = conn.prepareStatement("INSERT INTO Registrations VALUES (?,?)")){
+        ps.setString(1, student);
+        ps.setString(2, courseCode);
+      } catch (SQLException e) {
+         return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
+      }
+        return "{\"success\":true}";
     }
 
     // Unregister a student from a course, returns a tiny JSON document (as a String)
     public String unregister(String student, String courseCode){
-      return "{\"success\":false, \"error\":\"Unregistration is not implemented yet :(\"}";
+        try(PreparedStatement ps = conn.prepareStatement("DELETE FROM Registrations WHERE idnr=? AND coursecode=?")){
+        ps.setString(1, student);
+        ps.setString(2, courseCode);
+        } catch (SQLException e) {
+          return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
+        }
+      return "{\"success\":true}";
     }
 
     // Return a JSON document containing lots of information about a student, it should validate against the schema found in information_schema.json
@@ -59,6 +66,8 @@ public class PortalConnection {
             // replace this with something more useful
             "SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
             );){
+            JSONObject object = new JSONObject();
+            JSONArray array = new JSONArray();
             
             st.setString(1, student);
             
