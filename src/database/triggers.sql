@@ -71,30 +71,38 @@ CREATE FUNCTION unregister() RETURNS trigger AS $$
 			RETURN OLD;
 		END IF;
 
-        --Check if student is on waitinglist for this course and then remove from waitinglist
-        IF(EXISTS(SELECT student FROM WaitingList WHERE student = OLD.student AND course = OLD.course))
-            THEN 
-            DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
+        --Check if course is overfull
+		IF((SELECT COUNT(student) FROM Registered WHERE course = OLD.course) - 1 >= 
+        (SELECT capacity FROM LimitedCourses WHERE code = OLD.course))
+			THEN 
+			DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
+			RETURN OLD;
+		END IF;
+
+        --Check if there are no students in waitinglist
+		IF(NOT EXISTS (SELECT student FROM WaitingList WHERE course = OLD.course))
+			THEN
+			DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
+			RETURN OLD;
+		END IF;
+        
+        --Delete student from WaitingList if not first 
+        IF((SELECT place FROM CourseQueuePositions WHERE student = OLD.student AND course = OLD.course) != 1)
+            THEN DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
             RETURN OLD;
         END IF;
 
+        --Add first student in waitinglist to registered and then delete from waitinglist
+        INSERT INTO Registered(student, course) VALUES (
+            (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1),
+            OLD.course
+        );
+        DELETE FROM WaitingList WHERE student = (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1) 
+        AND course = OLD.course;
+        
         --Delete student from Registrations
         DELETE FROM Registered WHERE student = OLD.student AND course = OLD.course;
         RETURN OLD;
-
-        -- Check if this opened up a spot on the course. if so, add first in WaitingList to Registrations
-        IF (SELECT COUNT(*) FROM Registrations WHERE course = OLD.course AND status = 'registered') <
-        (SELECT capacity FROM LimitedCourses WHERE code = OLD.course)
-        THEN
-            -- course is not full, add first in waitinglist to registrations
-            INSERT INTO Registered(student, course) VALUES 
-            (
-            (SELECT student FROM WaitingList WHERE course = OLD.course ORDER BY position LIMIT 1), OLD.course  
-            );
-            DELETE FROM WaitingList WHERE student = OLD.stuident AND course = OLD.course AND pos = 1;
-            RETURN NEW;
-
-        END IF;
     END
 $$ LANGUAGE plpgsql;
 

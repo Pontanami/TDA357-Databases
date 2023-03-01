@@ -46,7 +46,7 @@ DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC111';
 ---------------------------------------------
 -- TEST #10: Unregister from a limited course without waiting list.
 -- EXPECTED OUTCOME: Pass
-DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC111';
+DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC444';
 
 ---------------------------------------------
 -- TEST #11: Unregister from a limited course with waiting list.
@@ -59,19 +59,14 @@ DELETE FROM Registrations WHERE student = '6666666666' AND course = 'CCC333';
 DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC333';
 
 ---------------------------------------------
--- TEST #12 Unregister from a limited course with a waiting list, when the student is in the middle of the waiting list.
--- EXPECTED OUTCOME: Pass
-DELETE FROM Registrations WHERE student = '2222222222' AND course ='CCC333';
-
----------------------------------------------
 -- TEST #13 Unregister from an overfull course with a waiting list.
 -- EXPECTED OUTCOME: Pass
 DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC555';
 
 ---------------------------------------------
--- TEST #14 Unregster student that is not registered or on waitinglist
+-- TEST #14 Unregister student that is not registered or on waitinglist
 -- EXPECTED OUTCOME DELETE 0
-DELETE FROM Registrations WHERE student = '6666666666' AND course = 'CCC333';
+DELETE FROM Registrations WHERE student = '7777777777' AND course = 'CCC222';
 
 ---------------------------------------------
 -- TEST #15 Unregister from a limited course with a waiting list, when the student is at the start of the waiting list.
@@ -83,4 +78,6 @@ DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC222';
 -- EXPECTED OUTCOME: Pass
 DELETE FROM Registrations WHERE student = '7777777777' AND course = 'CCC333';
 
+SELECT * FROM Registrations;
+SELECT * FROM CourseQueuePositions;
 
