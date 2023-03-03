@@ -77,7 +77,3 @@ DELETE FROM Registrations WHERE student = '3333333333' AND course = 'CCC222';
 -- TEST #16 Unregister from a limited course with a waiting list, when the student is at the end of the waiting list.
 -- EXPECTED OUTCOME: Pass
 DELETE FROM Registrations WHERE student = '7777777777' AND course = 'CCC333';
-
-SELECT * FROM Registrations;
-SELECT * FROM CourseQueuePositions;
-

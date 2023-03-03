@@ -1,6 +1,10 @@
 
 import java.sql.*; // JDBC stuff.
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.json.*; // JSON
 
 public class PortalConnection {
@@ -61,24 +65,89 @@ public class PortalConnection {
 
     // Return a JSON document containing lots of information about a student, it should validate against the schema found in information_schema.json
     public String getInfo(String student) throws SQLException{
-        
-        try(PreparedStatement st = conn.prepareStatement(
-            // replace this with something more useful
-            "SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
-            );){
-            JSONObject object = new JSONObject();
-            JSONArray array = new JSONArray();
-            
+        JSONObject result = new JSONObject();
+        //Basic information --------------------------------------------------------------------------------------------
+        try(PreparedStatement st = conn.prepareStatement("SELECT * FROM BasicInformation WHERE idnr=?");){
             st.setString(1, student);
-            
+
             ResultSet rs = st.executeQuery();
-            
-            if(rs.next())
-              return rs.getString("jsondata");
-            else
-              return "{\"student\":\"does not exist :(\"}"; 
-            
-        } 
+            if(!rs.next()){
+                return "{\"success\":false, \"error\":\"No such student\"}";
+            }
+            result.put("student", rs.getString("idnr"));
+            result.put("name", rs.getString("name"));
+            result.put("login", rs.getString("login"));
+            result.put("program", rs.getString("program"));
+            result.put("branch", rs.getString("branch"));
+        }
+        catch (SQLException e) {
+            return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
+        }
+        //Finished -----------------------------------------------------------------------------------------------------
+        try(PreparedStatement st = conn.prepareStatement("SELECT * FROM Taken LEFT OUTER JOIN Courses ON " +
+                "Taken.course = Courses.code AND Taken.student =?");) {
+            st.setString(1, student);
+
+            JSONArray finished = new JSONArray();
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                if(rs.getString("code") != null){
+                JSONObject course = new JSONObject();
+                course.put("course", rs.getString("name"));
+                course.put("code", rs.getString("code"));
+                course.put("credits", rs.getInt("credits"));
+                course.put("grade", rs.getString("grade"));
+                finished.put(course);
+                }
+            }
+            result.put("finished", finished);
+        }
+        catch (SQLException e) {
+            return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
+        }
+        //Registered ---------------------------------------------------------------------------------------------------
+        try(PreparedStatement st = conn.prepareStatement(
+                "SELECT Courses.name, Courses.code, status, place FROM Courses LEFT OUTER JOIN " +
+                        "Registrations ON Courses.code = Registrations.course AND student=? RIGHT OUTER JOIN CourseQueuePositions ON " +
+                        "Registrations.student = CourseQueuePositions.student AND Registrations.course = CourseQueuePositions.course");){
+            st.setString(1, student);
+            JSONArray registered = new JSONArray();
+
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                if(rs.getString("status") != null){
+                    JSONObject items = new JSONObject();
+                    items.put("course", rs.getString("name"));
+                    items.put("code", rs.getString("code"));
+                    items.put("status", rs.getString("status"));
+                    if(rs.getString("place") != null){
+                        items.put("position", rs.getInt("place"));
+                    }
+                    registered.put(items);
+                }
+            }
+            result.put("registered", registered);
+        }
+        catch (SQLException e) {
+            return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
+        }
+        try(PreparedStatement st = conn.prepareStatement("SELECT * FROM PathToGraduation WHERE student=?");){
+            st.setString(1, student);
+            ResultSet rs = st.executeQuery();
+            if(!rs.next()){
+                return "{\"success\":false, \"error\":\"No such student\"}";
+            }
+            result.put("seminarCourses", rs.getInt("seminarcourses"));
+            result.put("mathCredits", rs.getInt("mathcredits"));
+            result.put("researchCredits", rs.getInt("researchcredits"));
+            result.put("totalCredits", rs.getInt("totalcredits"));
+            result.put("canGraduate", rs.getBoolean("qualified"));
+
+        }
+        catch (SQLException e) {
+            return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
+        }
+        return result.toString();
     }
 
     // This is a hack to turn an SQLException into a JSON string error message. No need to change.
