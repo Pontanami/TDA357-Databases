@@ -46,6 +46,7 @@ public class PortalConnection {
       try (PreparedStatement ps = conn.prepareStatement("INSERT INTO Registrations VALUES (?,?)")){
         ps.setString(1, student);
         ps.setString(2, courseCode);
+        ps.executeUpdate();
       } catch (SQLException e) {
          return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
       }
@@ -112,7 +113,7 @@ public class PortalConnection {
         //Registered ---------------------------------------------------------------------------------------------------
         try(PreparedStatement st = conn.prepareStatement(
                 "SELECT Courses.name, Courses.code, status, place FROM Courses LEFT OUTER JOIN " +
-                        "Registrations ON Courses.code = Registrations.course AND student=? RIGHT OUTER JOIN CourseQueuePositions ON " +
+                        "Registrations ON Courses.code = Registrations.course AND student=? FULL OUTER JOIN CourseQueuePositions ON " +
                         "Registrations.student = CourseQueuePositions.student AND Registrations.course = CourseQueuePositions.course");){
             st.setString(1, student);
             JSONArray registered = new JSONArray();
