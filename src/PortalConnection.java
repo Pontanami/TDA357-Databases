@@ -99,7 +99,7 @@ public class PortalConnection {
                 JSONObject course = new JSONObject();
                 course.put("course", rs.getString("name"));
                 course.put("code", rs.getString("code"));
-                course.put("credits", rs.getInt("credits"));
+                course.put("credits", rs.getFloat("credits"));
                 course.put("grade", rs.getString("grade"));
                 finished.put(course);
                 }
@@ -142,9 +142,9 @@ public class PortalConnection {
                 return "{\"success\":false, \"error\":\"No such student\"}";
             }
             result.put("seminarCourses", rs.getInt("seminarcourses"));
-            result.put("mathCredits", rs.getInt("mathcredits"));
-            result.put("researchCredits", rs.getInt("researchcredits"));
-            result.put("totalCredits", rs.getInt("totalcredits"));
+            result.put("mathCredits", rs.getFloat("mathcredits"));
+            result.put("researchCredits", rs.getFloat("researchcredits"));
+            result.put("totalCredits", rs.getFloat("totalcredits"));
             result.put("canGraduate", rs.getBoolean("qualified"));
 
         }
