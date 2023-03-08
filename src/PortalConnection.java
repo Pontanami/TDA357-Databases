@@ -55,17 +55,17 @@ public class PortalConnection {
 
     // Unregister a student from a course, returns a tiny JSON document (as a String)
     public String unregister(String student, String courseCode){
-        try(PreparedStatement ps = conn.prepareStatement("DELETE FROM Registrations WHERE student=? AND course=?");){
-        ps.setString(1, student);
-        ps.setString(2, courseCode);
-        int i = ps.executeUpdate();
-        System.out.println(i);
-        if(i == 0)
-          return "{\"success\":false, \"error\":\"No such registration\"}";
+        String query = "DELETE FROM Registered WHERE student='"+student+"' AND course='"+courseCode+"'";
+        try(Statement ps = conn.createStatement()){
+            int r = ps.executeUpdate(query);
+            System.out.println("Deleted "+r+" registrations.");
+            if (r == 0) {
+                return "{\"success\":false, \"error\":\"Student is not registered for that course\"}";
+            }
         } catch (SQLException e) {
           return "{\"success\":false, \"error\":\""+getError(e)+"\"}";
         }
-      return "{\"success\":true}";
+        return "{\"success\":true}";
     }
 
     // Return a JSON document containing lots of information about a student, it should validate against the schema found in information_schema.json

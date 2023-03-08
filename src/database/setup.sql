@@ -234,7 +234,7 @@ INSERT INTO Courses VALUES ('CCC666', 'C6', 20, 'Computer Science and Engineerin
 INSERT INTO LimitedCourses VALUES ('CCC222',3);
 INSERT INTO LimitedCourses VALUES ('CCC333',2);
 INSERT INTO LimitedCourses VALUES ('CCC444',3);
-INSERT INTO LimitedCourses VALUES ('CCC555',3);
+INSERT INTO LimitedCourses VALUES ('CCC555',2);
 
 INSERT INTO Prerequisites VALUES('CCC666', 'CCC111');
 INSERT INTO Prerequisites VALUES('CCC666', 'CCC222');
